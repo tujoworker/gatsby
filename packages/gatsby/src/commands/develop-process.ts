@@ -432,6 +432,18 @@ module.exports = async (program: IProgram): Promise<void> => {
   await runStaticQueries({ queryIds, store, program })
   await runPageQueries({ queryIds, store, program })
 
+  {
+    // Write out files.
+    const activity = report.activityTimer(`write out requires`)
+    activity.start()
+    try {
+      await requiresWriter.writeAll(store.getState())
+    } catch (err) {
+      report.panic(`Failed to write out requires`, err)
+    }
+    activity.end()
+  }
+
   require(`../redux/actions`).boundActionCreators.setProgramStatus(
     `BOOTSTRAP_QUERY_RUNNING_FINISHED`
   )

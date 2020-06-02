@@ -31,7 +31,6 @@ process.on(`unhandledRejection`, (reason, p) => {
 
 import { createGraphQLRunner } from "./create-graphql-runner"
 const { extractQueries } = require(`../query/query-watcher`)
-import * as requiresWriter from "./requires-writer"
 import { writeRedirects, startRedirectListener } from "./redirects-writer"
 
 // Override console.log to add the source file + line number.
@@ -524,18 +523,6 @@ module.exports = async (args: BootstrapArgs) => {
   activity.end()
 
   await extractQueries({ parentSpan: bootstrapSpan })
-
-  // Write out files.
-  activity = reporter.activityTimer(`write out requires`, {
-    parentSpan: bootstrapSpan,
-  })
-  activity.start()
-  try {
-    await requiresWriter.writeAll(store.getState())
-  } catch (err) {
-    reporter.panic(`Failed to write out requires`, err)
-  }
-  activity.end()
 
   // Write out redirects.
   activity = reporter.activityTimer(`write out redirect data`, {

@@ -7,6 +7,7 @@ import telemetry from "gatsby-telemetry"
 import { buildHTML } from "./build-html"
 import { buildProductionBundle } from "./build-javascript"
 import bootstrap from "../bootstrap"
+import * as requiresWriter from "../bootstrap/requires-writer"
 import apiRunnerNode from "../utils/api-runner-node"
 import { GraphQLRunner } from "../query/graphql-runner"
 import { copyStaticDirs } from "../utils/get-static-dir"
@@ -95,6 +96,20 @@ module.exports = async function build(program: IBuildArgs): Promise<void> {
     parentSpan: buildSpan,
     store,
   })
+
+  {
+    // Write out files.
+    const activity = report.activityTimer(`write out requires`, {
+      parentSpan: buildSpan,
+    })
+    activity.start()
+    try {
+      await requiresWriter.writeAll(store.getState())
+    } catch (err) {
+      report.panic(`Failed to write out requires`, err)
+    }
+    activity.end()
+  }
 
   await apiRunnerNode(`onPreBuild`, {
     graphql: bootstrapGraphQLRunner,
