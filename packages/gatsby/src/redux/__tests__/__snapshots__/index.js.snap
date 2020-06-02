@@ -20,6 +20,7 @@ Object {
     "complete": Map {},
     "incomplete": Map {},
   },
+  "modules": Map {},
   "nodes": Map {
     "pageA" => Object {
       "id": "pageA",
@@ -54,6 +55,7 @@ Object {
   },
   "pageData": Map {},
   "pageDataStats": Map {},
+  "queryModuleDependencies": Map {},
   "staticQueryComponents": Map {},
   "status": Object {
     "PLUGINS_HASH": "",

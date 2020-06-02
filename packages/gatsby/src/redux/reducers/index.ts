@@ -24,6 +24,8 @@ import { nodesTouchedReducer } from "./nodes-touched"
 import { flattenedPluginsReducer } from "./flattened-plugins"
 import schemaCustomizationReducer from "./schema-customization"
 import inferenceMetadataReducer from "./inference-metadata"
+import { modulesReducer } from "./modules"
+import { queryModuleDependenciesReducer } from "./query-module-dependencies"
 
 /**
  * @property exports.nodesTouched Set<string>
@@ -55,4 +57,6 @@ export {
   inferenceMetadataReducer as inferenceMetadata,
   pageDataStatsReducer as pageDataStats,
   pageDataReducer as pageData,
+  modulesReducer as modules,
+  queryModuleDependenciesReducer as queryModuleDependencies,
 }

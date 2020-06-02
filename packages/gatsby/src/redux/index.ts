@@ -78,6 +78,8 @@ export const saveState = (): void => {
     webpackCompilationHash: state.webpackCompilationHash,
     pageDataStats: state.pageDataStats,
     pageData: state.pageData,
+    modules: state.modules,
+    queryModuleDependencies: state.queryModuleDependencies,
   })
 }
 
