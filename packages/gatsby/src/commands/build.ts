@@ -89,6 +89,13 @@ module.exports = async function build(program: IBuildArgs): Promise<void> {
     graphqlRunner,
   })
 
+  await runPageQueries({
+    queryIds,
+    graphqlRunner,
+    parentSpan: buildSpan,
+    store,
+  })
+
   await apiRunnerNode(`onPreBuild`, {
     graphql: bootstrapGraphQLRunner,
     parentSpan: buildSpan,
@@ -136,13 +143,6 @@ module.exports = async function build(program: IBuildArgs): Promise<void> {
 
     rewriteActivityTimer.end()
   }
-
-  await runPageQueries({
-    queryIds,
-    graphqlRunner,
-    parentSpan: buildSpan,
-    store,
-  })
 
   if (process.env.GATSBY_EXPERIMENTAL_PAGE_BUILD_ON_DATA_CHANGES) {
     const { pages } = store.getState()
