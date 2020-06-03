@@ -149,7 +149,7 @@ exports.sourceNodes = async (
   )
 
   // Store a raw and unresolved copy of the data for caching
-  const currentSyncDataRaw = { ...currentSyncData }
+  const currentSyncDataRaw = _.cloneDeep(currentSyncData)
 
   // Use the JS-SDK to resolve the entries and assets
   const res = client.parseEntries({
