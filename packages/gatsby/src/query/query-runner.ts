@@ -158,9 +158,18 @@ export const queryRunner = async (
 
     if (queryJob.isPage) {
       const publicDir = path.join(program.directory, `public`)
-      const { pages } = store.getState()
+      const { pages, queryModuleDependencies } = store.getState()
       const page = pages.get(queryJob.id)
-      await pageDataUtil.write({ publicDir }, page, result)
+      const pageModuleDependencies = Array.from(
+        queryModuleDependencies.get(queryJob.id) || []
+      )
+
+      await pageDataUtil.write(
+        { publicDir },
+        page,
+        result,
+        pageModuleDependencies
+      )
     } else {
       // The babel plugin is hard-coded to load static queries from
       // public/static/d/

@@ -21,13 +21,14 @@ const remove = async ({ publicDir }, pagePath) => {
   return Promise.resolve()
 }
 
-const write = async ({ publicDir }, page, result) => {
+const write = async ({ publicDir }, page, result, moduleDependencies) => {
   const filePath = getFilePath({ publicDir }, page.path)
   const body = {
     componentChunkName: page.componentChunkName,
     path: page.path,
     matchPath: page.matchPath,
     result,
+    moduleDependencies,
   }
   const bodyStr = JSON.stringify(body)
   // transform asset size to kB (from bytes) to fit 64 bit to numbers
