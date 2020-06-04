@@ -11,6 +11,7 @@ import { getBrowsersList } from "./browserslist"
 
 import { GatsbyWebpackStatsExtractor } from "./gatsby-webpack-stats-extractor"
 import { GatsbyWebpackEslintGraphqlSchemaReload } from "./gatsby-webpack-eslint-graphql-schema-reload-plugin"
+import { GatsbyWebpackVirtualModules } from "./gatsby-webpack-virtual-modules"
 
 import { builtinPlugins } from "./webpack-plugins"
 import { IProgram, Stage } from "../commands/types"
@@ -100,6 +101,7 @@ type PluginUtils = BuiltinPlugins & {
   minifyCss: PluginFactory
   fastRefresh: PluginFactory
   eslintGraphqlSchemaReload: PluginFactory
+  virtualModules: PluginFactory
 }
 
 /**
@@ -647,6 +649,9 @@ export const createWebpackUtils = (
 
   plugins.eslintGraphqlSchemaReload = (): GatsbyWebpackEslintGraphqlSchemaReload =>
     new GatsbyWebpackEslintGraphqlSchemaReload()
+
+  plugins.virtualModules = (): GatsbyWebpackVirtualModules =>
+    new GatsbyWebpackVirtualModules()
 
   return {
     loaders,
