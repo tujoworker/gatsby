@@ -66,6 +66,15 @@ export const getComponents = (pages: IGatsbyPage[]): IGatsbyPageComponent[] =>
     .orderBy(c => c.componentChunkName)
     .value()
 
+const getModuleIds = (modules: IGatsbyState["modules"]): string[] => {
+  const ret: string[] = []
+  modules.forEach(({ moduleID }) => {
+    ret.push(moduleID)
+  })
+
+  return ret.sort()
+}
+
 /**
  * Get all dynamic routes and sort them by most specific at the top
  * code is based on @reach/router match utility (https://github.com/reach/router/blob/152aff2352bc62cefc932e1b536de9efde6b64a5/src/lib/utils.js#L224-L254)
@@ -154,11 +163,12 @@ const getMatchPaths = (pages: IGatsbyPage[]): IGatsbyPageMatchPath[] => {
 
 const createHash = (
   matchPaths: IGatsbyPageMatchPath[],
-  components: IGatsbyPageComponent[]
+  components: IGatsbyPageComponent[],
+  modules: string[]
 ): string =>
   crypto
     .createHash(`md5`)
-    .update(JSON.stringify({ matchPaths, components }))
+    .update(JSON.stringify({ matchPaths, components, modules }))
     .digest(`hex`)
 
 // Write out pages information.
@@ -168,8 +178,9 @@ export const writeAll = async (state: IGatsbyState): Promise<boolean> => {
   const pages = [...state.pages.values()]
   const matchPaths = getMatchPaths(pages)
   const components = getComponents(pages)
+  const moduleIds = getModuleIds(state.modules)
 
-  const newHash = createHash(matchPaths, components)
+  const newHash = createHash(matchPaths, components, moduleIds)
 
   if (newHash === lastHash) {
     // Nothing changed. No need to rewrite files
@@ -201,6 +212,10 @@ const preferDefault = m => m && m.default || m
         }": ${hotMethod}(preferDefault(require("${joinPath(c.component)}")))`
     )
     .join(`,\n`)}
+}\n\nexports.modules = {\n${moduleIds.map(
+    moduleId =>
+      `  "${moduleId}": preferDefault(require("$virtual/modules/${moduleId}"))`
+  )}  
 }\n\n`
 
   // Create file with async requires of components/json files.
@@ -220,7 +235,12 @@ const preferDefault = m => m && m.default || m
       )}" /* webpackChunkName: "${c.componentChunkName}" */)`
     })
     .join(`,\n`)}
-}\n\n`
+}\n\nexports.modules = {\n${moduleIds
+    .map(
+      moduleId =>
+        `  "${moduleId}": () => import("$virtual/modules/${moduleId}.js" /* webpackChunkName: "${moduleId}" */)`
+    )
+    .join(`,\n`)}}\n\n`
 
   const writeAndMove = (file: string, data: string): Promise<void> => {
     const destination = joinPath(program.directory, `.cache`, file)
@@ -280,6 +300,16 @@ export const startListener = (): void => {
   })
 
   emitter.on(`DELETE_PAGE_BY_PATH`, (): void => {
+    reporter.pendingActivity({ id: `requires-writer` })
+    debouncedWriteAll()
+  })
+
+  emitter.on(`REGISTER_MODULE`, (): void => {
+    reporter.pendingActivity({ id: `requires-writer` })
+    debouncedWriteAll()
+  })
+
+  emitter.on(`UNREGISTER_MODULE`, (): void => {
     reporter.pendingActivity({ id: `requires-writer` })
     debouncedWriteAll()
   })
