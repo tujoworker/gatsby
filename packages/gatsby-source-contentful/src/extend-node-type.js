@@ -552,6 +552,42 @@ exports.extendNodeType = ({ type, store }) => {
         type: GraphQLString,
         deprecationReason: `This field is deprecated, please use 'raw' instead. @todo add link to migration steps.`,
       },
+      references: {
+        type: [`ContentfulProduct`],
+        async resolve(source, args, context, info) {
+          const references = []
+
+          const traverse = obj => {
+            for (let k in obj) {
+              const value = obj[k]
+              if (value && value.sys && value.sys.type === `Link`) {
+                references.push(value.sys.contentful_id)
+              } else if (value && typeof value === `object`) {
+                traverse(value)
+              }
+            }
+          }
+
+          traverse(JSON.parse(source.raw))
+
+          if (!references.length) {
+            return null
+          }
+
+          const result = await context.nodeModel.runQuery({
+            query: {
+              filter: {
+                contentful_id: { in: references },
+              },
+            },
+            type: `ContentfulProduct`,
+          })
+
+          console.log({ result })
+
+          return result
+        },
+      },
     }
   }
 
