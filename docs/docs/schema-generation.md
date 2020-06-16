@@ -2,10 +2,51 @@
 title: Schema Generation
 ---
 
-> This documentation isn't up to date with the latest [schema customization changes](/docs/schema-customization).
-> You can help by making a PR to [update this documentation](https://github.com/gatsbyjs/gatsby/issues/14228).
+Once the nodes have been sourced and transformed, the next step is to generate the GraphQL Schema. Gatsby Schema is different from many regular GraphQL schemas is that it's combines plugin or user defined schema information with data inferred from node shapes itself. The latter is called _schema inferrence_. Users or plugin can explicity define whole or part of the schema using [schema customization API](/docs/schema-customization). Usually every node will get a GraphQL Type based on its `node.internal.type` field. When using Schema Customization, all types that implement `Node` inteface become GraphQL Node Types and thus get root level fields for accessing them.
 
-Once the nodes have been sourced and transformed, the next step is to generate the GraphQL Schema. This is one of the more complex parts of the Gatsby code base. In fact, as of writing, it accounts for a third of the lines of code in core Gatsby. It involves inferring a GraphQL schema from all the nodes that have been sourced and transformed so far. Read on to find out how it's done.
+## GraphQL Compose
+
+Schema creation is done using [`graphql-compose`](https://github.com/graphql-compose/graphql-compose) library. GraphQL Compose is a toolkit to programmatically create schemas. It has great tools to add types and fields in an iterative manner. Gatsby does lots of processing and schema generation, thus such library is perfect for our use case.
+
+Schema in GraphQL Compose is created by adding types to a Schema Composer - an intermediate object that holds all the schema types inside itself. After all modifications are done, composer is converted into regular GraphQL Schema.
+
+## 1. Schema inference
+
+Every time a node is created Gatsby will generate _inference metadata_ for it. Metadata for each node can be merged with other metadata, meaning that it's possible to derive the least generic possible schema for a particular node type. Inference metadata can also detect if some data is conflicting. In most cases, this would mean that a warning will be reported for the user and the field won't appear in the data.
+
+This step is explained in more detail in [Schema Inference](/docs/schema-inference)
+
+## 2. Adding types
+
+Types that are added by users and plugins using `createTypes` are added to the schema composer. The types that don't have inference disabled will also get types created from Schema Inference merged into them, with user created fields having priority. After that inferred types that haven't been created are also added to the composer.
+
+## 3. Legacy schema customization
+
+Before schema customization was added, there were several ways that one could modify the schema. Those were `createNodeField` action, `setFieldsOnGraphQLType` API and `gatsby-config` mappings.
+
+### `createNodeField`
+
+This adds a field under `fields` field (yo dawg). This method is needed because plugins can't modify types that they haven't created, so this is a way to add data to nodes that it doesn't own. This doesn't modify schema directly, instead those fields are picked by inference. There are no plans currently to deprecate this API at the moment.
+
+### `setFieldsOnGraphQLType`
+
+This allows adding GraphQL Fields to any node type. This operates on GraphQL types itself and syntax matches `graphql-js` field definitions. This API will be marked as deprecated in Gatsby v3, moved under flag in Gatsby v4 and removed from Gatsby v5. `createTypes` and `addResolvers` should solve all the use cases when this API is used.
+
+### `graphql-config.js` mapping
+
+It's possible to connect types throught site configuration using [Node Type Mapping](https://www.gatsbyjs.org/docs/gatsby-config/#mapping-node-types).
+
+It is a convenient escape hatch and there are no plans to deprecate this API at the moment.
+
+## 4. Parent / children relationships
+
+## 5. Processing each type and adding root fields
+
+## 6. Merging in third-party schemas
+
+## 7. Adding custom resolvers
+
+## 8. Second schema build for SitePage
 
 ## Group all nodes by type
 
