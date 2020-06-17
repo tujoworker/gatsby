@@ -8,6 +8,7 @@ import { match } from "@reach/router/lib/utils"
 import { joinPath } from "gatsby-core-utils"
 import { store, emitter } from "../redux/"
 import { IGatsbyState, IGatsbyPage } from "../redux/types"
+import { writeModule } from "../utils/gatsby-webpack-virtual-modules"
 
 interface IGatsbyPageComponent {
   component: string
@@ -211,7 +212,7 @@ const preferDefault = m => m && m.default || m
     .map((c: IGatsbyPageComponent): string => {
       // we need a relative import path to keep contenthash the same if directory changes
       const relativeComponentPath = path.relative(
-        path.join(program.directory, `.cache`),
+        path.join(program.directory, `node_modules`),
         c.component
       )
 
@@ -223,6 +224,11 @@ const preferDefault = m => m && m.default || m
 }\n\n`
 
   const writeAndMove = (file: string, data: string): Promise<void> => {
+    writeModule(file, data)
+
+    // files in .cache are not used anymore as part of webpack builds, but
+    // still can be used by other tools (for example `gatsby serve` reads
+    // `match-paths.json` to setup routing)
     const destination = joinPath(program.directory, `.cache`, file)
     const tmp = `${destination}.${Date.now()}`
     return fs
