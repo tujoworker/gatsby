@@ -136,8 +136,12 @@ type BabelStageKeys =
   | "build-html"
   | "build-javascript"
 
+export interface IStateProgram extends IProgram {
+  extensions: string[]
+}
+
 export interface IGatsbyState {
-  program: IProgram
+  program: IStateProgram
   nodes: GatsbyNodes
   nodesByType: Map<string, GatsbyNodes>
   resolvedNodesCache: Map<string, any> // TODO
@@ -213,12 +217,17 @@ export interface IGatsbyState {
     }
   }
   schemaCustomization: {
-    composer: SchemaComposer<any>
-    context: {} // TODO
-    fieldExtensions: {} // TODO
-    printConfig: any // TODO
-    thridPartySchemas: any[] // TODO
-    types: any[] // TODO
+    composer: null | SchemaComposer<any>
+    context: Record<string, any>
+    fieldExtensions: GraphQLFieldExtensionDefinition
+    printConfig: {
+      path?: string
+      include?: { types?: Array<string>; plugins?: Array<string> }
+      exclude?: { types?: Array<string>; plugins?: Array<string> }
+      withFieldTypes?: boolean
+    } | null
+    thirdPartySchemas: GraphQLSchema[]
+    types: (string | { typeOrTypeDef: DocumentNode; plugin: IGatsbyPlugin })[]
   }
   themes: any // TODO
   logs: IGatsbyCLIState
@@ -290,9 +299,14 @@ export type ActionsUnion =
   | ICreateJobAction
   | ISetJobAction
   | IEndJobAction
+  | ICreateResolverContext
+  | IClearSchemaCustomizationAction
+  | ISetSchemaComposerAction
   | IStartIncrementalInferenceAction
   | IBuildTypeMetadataAction
   | IDisableTypeInferenceAction
+  | ISetProgramAction
+  | ISetProgramExtensions
 
 interface ISetBabelPluginAction {
   type: `SET_BABEL_PLUGIN`
@@ -505,6 +519,15 @@ export interface ICreateResolverContext {
     | { [camelCasedPluginNameWithoutPrefix: string]: IGatsbyPluginContext }
 }
 
+interface IClearSchemaCustomizationAction {
+  type: `CLEAR_SCHEMA_CUSTOMIZATION`
+}
+
+interface ISetSchemaComposerAction {
+  type: `SET_SCHEMA_COMPOSER`
+  payload: SchemaComposer<any>
+}
+
 export interface ICreatePageAction {
   type: `CREATE_PAGE`
   payload: IGatsbyPage
@@ -670,5 +693,15 @@ interface IBuildTypeMetadataAction {
 
 interface IDisableTypeInferenceAction {
   type: `DISABLE_TYPE_INFERENCE`
+  payload: string[]
+}
+
+interface ISetProgramAction {
+  type: `SET_PROGRAM`
+  payload: IStateProgram
+}
+
+interface ISetProgramExtensions {
+  type: `SET_PROGRAM_EXTENSIONS`
   payload: string[]
 }
