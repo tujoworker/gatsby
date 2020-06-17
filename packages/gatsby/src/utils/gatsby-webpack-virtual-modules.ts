@@ -8,7 +8,7 @@ const fileContentLookup: Record<string, string> = {}
 const instances: IGatsbyWebpackVirtualModulesContext[] = []
 
 export class GatsbyWebpackVirtualModules {
-  apply(compiler) {
+  apply(compiler): void {
     const virtualModules = new VirtualModulesPlugin(fileContentLookup)
     virtualModules.apply(compiler)
     instances.push({
