@@ -12,7 +12,7 @@ export class GatsbyWebpackVirtualModules {
     const virtualModules = new VirtualModulesPlugin(fileContentLookup)
     virtualModules.apply(compiler)
     instances.push({
-      writeModule: virtualModules.writeModule,
+      writeModule: virtualModules.writeModule.bind(virtualModules),
     })
   }
 }
