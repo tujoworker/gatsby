@@ -1,11 +1,11 @@
 import VirtualModulesPlugin from "webpack-virtual-modules"
 
-interface GatsbyWebpackVirtualModulesContext {
+interface IGatsbyWebpackVirtualModulesContext {
   writeModule: VirtualModulesPlugin["writeModule"]
 }
 
 const fileContentLookup: Record<string, string> = {}
-const instances: GatsbyWebpackVirtualModulesContext[] = []
+const instances: IGatsbyWebpackVirtualModulesContext[] = []
 
 export class GatsbyWebpackVirtualModules {
   apply(compiler) {
