@@ -6,6 +6,12 @@ GATSBY_PATH="${CIRCLE_WORKING_DIRECTORY:-../../}"
 # cypress docker does not support sudo and does not need it, but the default node executor does
 command -v gatsby-dev || command -v sudo && sudo npm install -g gatsby-dev-cli || npm install -g gatsby-dev-cli &&
 
+echo "ls -al ./packages/gatsby-admin/node_modules/.bin"
+ls -al ./packages/gatsby-admin/node_modules/.bin 
+
+echo "ls -al ./packages/gatsby/node_modules/.bin"
+ls -al ./packages/gatsby/node_modules/.bin 
+
 # setting up child integration test link to gatsby packages
 cd "$SRC_PATH" &&
 gatsby-dev --set-path-to-repo "$GATSBY_PATH" &&
