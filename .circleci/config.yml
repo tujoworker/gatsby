@@ -239,32 +239,32 @@ jobs:
           working_directory: ~/project/www
 
   integration_tests_long_term_caching:
-    <<: *e2e-executor
+    executor: node
     steps:
       - e2e-test:
           test_path: integration-tests/long-term-caching
 
   integration_tests_cache_resilience:
-    <<: *e2e-executor
+    executor: node
     steps:
       - e2e-test:
           test_path: integration-tests/cache-resilience
 
   integration_tests_gatsby_pipeline:
-    <<: *e2e-executor
+    executor: node
     steps:
       - e2e-test:
           test_path: integration-tests/gatsby-pipeline
 
   integration_tests_gatsby_cli:
-    <<: *e2e-executor
+    executor: node
     steps:
       - e2e-test:
           test_path: integration-tests/gatsby-pipeline
           trigger_pattern: packages/gatsby-cli/*|packages/gatsby/*|integration-tests/gatsby-cli/*
 
   integration_tests_structured_logging:
-    <<: *e2e-executor
+    executor: node
     steps:
       - e2e-test:
           test_path: integration-tests/structured-logging
